@@ -2,88 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterAuthRequest;
-use App\User;
-use JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Carbon;
+use App\Http\Requests;
+//use Session;
 use Cart;
+
+session_start();
 
 class CheckoutController extends Controller
 {
     public $loginAfterSignUp = true;
 
-    public function register(RegisterAuthRequest $request)
+    public function login_check()
     {
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->password = bcrypt($request->password);
-        $user->save();
-
-        if ($this->loginAfterSignUp) {
-            return $this->login($request);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $user
-        ], 200);
+        return view('pages.login');
     }
 
-    public function login(Request $request)
-    {
-        $input = $request->only('email', 'password');
-        $jwt_token = null;
-
-        if (!$jwt_token = JWTAuth::attempt($input)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid Email or Password',
-            ], 401);
-        }
-
-        return response()->json([
-            'success' => true,
-            'token' => $jwt_token,
-        ]);
-    }
-
-    public function logout(Request $request)
+    public function customer_registration(Request $request)
     {
         $this->validate($request, [
-            'token' => 'required'
+            'customer_name' => 'required',
+            'customer_email' => 'required',
+            'password' => 'required',
+            'mobile_number' => 'required',
         ]);
 
-        try {
-            JWTAuth::invalidate($request->token);
+        $data = array();
+        $data['customer_name'] = $request->customer_name;
+        $data['customer_email'] = $request->customer_email;
+        $data['password'] = md5($request->password);
+        $data['mobile_number'] = $request->mobile_number;
+        $data['created_at'] = Carbon::now(); //->toDateString();
+        $data['updated_at'] = Carbon::now(); //->toDateString();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User logged out successfully'
-            ]);
-        } catch (JWTException $exception) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, the user cannot be logged out'
-            ], 500);
-        }
+        // if ($this->loginAfterSignUp) {
+        //     return $this->login($request);
+        // }
+
+        $customer_id = DB::table('customer')
+                       ->insertGetId($data);
+
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => $customer_id
+        // ], 200);
+
+                Session::put('customer_id', $customer_id);
+                Session::put('customer_name', $request->customer_name);
+                return Redirect('/checkout');
     }
 
-    public function getAuthUser(Request $request)
+    public function checkout()
     {
-        $this->validate($request, [
-            'token' => 'required'
-        ]);
+        // $all_published_category = DB::table('category')
+        //                           ->where('publication_status', 1)
+        //                           ->get();
+        // return view('pages.checkout', compact('all_published_category'));
 
-        $user = JWTAuth::authenticate($request->token);
-
-        return response()->json(['user' => $user]);
+        return view('pages.checkout');
     }
 
     public function save_shipping_details(Request $request)
@@ -101,12 +81,26 @@ class CheckoutController extends Controller
         $shipping_id = DB::table('shipping')
                        ->insertGetId($data);
             Session::put('shipping_id', $shipping_id);
+            return Redirect::to('/payment');
+    }
 
-        return response()->json([
-            'success' => true,
-            'data' => $shipping_id
-        ], 200);
-            //return Redirect::to('/payment');
+    public function customer_login(Request $request)
+    {
+        $customer_email = $request->customer_email;
+        $password = md5($request->password);
+        $result = DB::table('customer')
+                  ->where('customer_email', $customer_email)
+                  ->where('password', $password)
+                  ->first();
+
+            if ($result) {
+                Session::put('customer_id', $result->customer_id, 'customer_name', $result->customer_name);
+                //Session::put('customer_name', $result->customer_name);
+                return Redirect::to('/checkout');
+            }
+            else {
+                return Redirect::to('/login-check');
+            }
     }
 
     public function payment()
@@ -127,7 +121,7 @@ class CheckoutController extends Controller
                       ->insertGetId($paymentData);
 
         $orderData = array();
-        $orderData['user_id'] = Session::get('user_id');
+        $orderData['customer_id'] = Session::get('customer_id');
         $orderData['shipping_id'] = Session::get('shipping_id');
         $orderData['payment_id'] = $payment_id;
         $orderData['order_total'] = Cart::total();
@@ -160,11 +154,6 @@ class CheckoutController extends Controller
             Cart::destroy();
             return view('pages.handcash');
             // Cart::destroy();
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction Successfully Done By Handcash !!!',
-            ], 200);
-            //return response()->json('handcash', 200);
         }
 
         elseif ($payment_gateway == 'card') {
@@ -184,40 +173,33 @@ class CheckoutController extends Controller
     public function manage_order()
     {
         $all_order_info = DB::table('order')
-                   ->join('users', 'order.user_id', '=', 'users.user_id')
-                   ->select('order.*', 'users.name')
+                   ->join('customer', 'order.customer_id', '=', 'customer.customer_id')
+                   ->select('order.*', 'customer.customer_name')
                    ->get();
 
-        //return view('admin.manage_order', compact('all_order_info'));
-        return response()->json([
-            'success' => true,
-            'data' => $all_order_info,
-            'message' => 'This is all successfully placed orders !!!',
-        ], 200);
+        return view('admin.manage_order', compact('all_order_info'));
     }
 
     public function view_order($order_id)
     {
         $order_by_id = DB::table('order')
-                   ->join('users', 'order.user_id', '=', 'users.user_id')
+                   ->join('customer', 'order.customer_id', '=', 'customer.customer_id')
                    ->join('order_details', 'order.order_id', '=', 'order_details.order_id')
                    ->join('shipping', 'order.shipping_id', '=', 'shipping.shipping_id')
-                   ->select('order.*', 'order_details.*', 'shipping.*', 'users.*')
+                   ->select('order.*', 'order_details.*', 'shipping.*', 'customer.*')
                    ->get();
 
-        //return view('admin.view_order', compact('order_by_id'));
-
-        return response()->json([
-            'success' => true,
-            'data' => $order_by_id,
-            'message' => 'This is a successfully placed order !!!',
-        ], 200);
+        return view('admin.view_order', compact('order_by_id'));
     }
 
-    // public function customer_logout()
-    // {
-    //     Session::flush();
-    //     return Redirect::to('/');
-    // }
+    public function customer_logout()
+    {
+        Session::flush();
+        return Redirect::to('/');
+    }
 
+    // private function sslapi()
+    // {
+
+    // }
 }

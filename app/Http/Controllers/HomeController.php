@@ -27,9 +27,14 @@ class HomeController extends Controller
                    ->where('products.status', 'enable')
                    ->limit(9)
                    ->get();
-        return view('pages.home_content', compact('all_published_product'));
+        //return view('pages.home_content', compact('all_published_product'));
 
-        //return view('pages.home_content');
+        return response()->json([
+            'success' => true,
+            'data' => $all_published_product,
+            'message' => 'All Successfully Published Products !!!',
+        ], 200);
+
     }
 
     public function show_product_by_category($category_id)
@@ -42,7 +47,12 @@ class HomeController extends Controller
                    ->where('products.status', 'enable')
                    ->limit(10)
                    ->get();
-        return view('pages.category_by_products', compact('product_by_category'));
+        //return view('pages.category_by_products', compact('product_by_category'));
+        return response()->json([
+            'success' => true,
+            'data' => $product_by_category,
+            'message' => 'All Successfully Published Product Category !!!',
+        ], 200);
 
     }
 
@@ -56,7 +66,12 @@ class HomeController extends Controller
                    ->where('products.status', 'enable')
                    ->limit(18)
                    ->get();
-        return view('pages.manufacture_by_products', compact('product_by_manufacture'));
+        //return view('pages.manufacture_by_products', compact('product_by_manufacture'));
+        return response()->json([
+            'success' => true,
+            'data' => $product_by_manufacture,
+            'message' => 'All Successfully Published Product Manufacture !!!',
+        ], 200);
 
     }
 
@@ -72,7 +87,12 @@ class HomeController extends Controller
 
                    //->limit(18)
                    //->get();
-        return view('pages.product_details', compact('product_by_details'));
+        //return view('pages.product_details', compact('product_by_details'));
+        return response()->json([
+            'success' => true,
+            'data' => $product_by_details,
+            'message' => 'Products By Details !!!',
+        ], 200);
 
     }
 
@@ -80,7 +100,13 @@ class HomeController extends Controller
     {
        $product = Product::findOrFail($product_id);
        $review = Review::all()->where('product_id', $product_id);
-       return view('pages.reviews.show', compact('product', 'review'));
+       //return view('pages.reviews.show', compact('product', 'review'));
+       return response()->json([
+            'success' => true,
+            'data' => $product, $review,
+            'message' => 'Product Review !!!',
+        ], 200);
+
     }
 
     public function wishList(Request $request)
@@ -101,7 +127,12 @@ class HomeController extends Controller
         // $wishList->customer()->associate($customer_id);
         $wishList->save();
 
-        return redirect()->back()->with('success', 'Product Added To WishList');
+        //return redirect()->back()->with('success', 'Product Added To WishList');
+        return response()->json([
+            'success' => true,
+            //'data' => $product_by_details,
+            'message' => 'Wish List Saved Successfully !!!',
+        ], 200);
 
     //    $products = DB::table('products')->where('product_id', $request->product_id)->get();
     //    return view('pages.product_details', compact('products'));
@@ -111,13 +142,24 @@ class HomeController extends Controller
     public function view_wishList()
     {
         $products = DB::table('wish_lists')->leftJoin('products', 'wish_lists.product_id', '=', 'products.product_id')->get();
-        return view('pages.wishList', compact('products'));
+        //return view('pages.wishList', compact('products'));
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+            'message' => 'View Wish List !!!',
+        ], 200);
+
     }
 
     public function removeWishList($id)
     {
         DB::table('wish_lists')->where('product_id', '=', $id)->delete();
-        return back()->with('success', 'Product Removed From WishList');
+        //return back()->with('success', 'Product Removed From WishList');
+        return response()->json([
+            'success' => true,
+            // 'data' => $product_by_details,
+            'message' => 'Products By Details !!!',
+        ], 200);
     }
 
 }

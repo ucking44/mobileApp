@@ -16,7 +16,13 @@ class ReviewsController extends Controller
     public function index()
     {
         $reviews = Review::all();
-        return view('pages.reviews.indexR', compact('reviews'));
+        //return view('pages.reviews.indexR', compact('reviews'));
+        return response()->json([
+            'success' => true,
+            'data' => $reviews,
+            'message' => 'All Reviews !!!',
+        ], 200);
+
     }
 
     /**
@@ -51,7 +57,12 @@ class ReviewsController extends Controller
         //$review->rating = $request->input('rating');
         $review->product_id = $request['product_id'];
         $review->save();
-        return redirect()->back()->with('success', 'Review Submitted Successfully ):');
+        //return redirect()->back()->with('success', 'Review Submitted Successfully ):');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Review Saved Successfully !!!',
+        ], 200);
 
     }
 

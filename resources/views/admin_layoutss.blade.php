@@ -34,7 +34,7 @@
           </button>
           <a class="navbar-brand" href="index.html">SB Admin</a>
         </div>
-        
+
 
         <!-- Collect the nav links, forms, and other content for toggling -->
 
@@ -334,7 +334,7 @@
     <script src="{{ asset('backend/js/tablesorter/jquery.tablesorter.js') }}"></script>
     <script src="{{ asset('backend/js/tablesorter/tables.js') }}"></script>
     <script type="text/javascript" src="{{ asset('https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js')}}"></script>
-    
+
 
   </body>
 </html>

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OminiPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,24 +19,36 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::post('login', 'ApiController@login');
-Route::post('register', 'ApiController@register');
+Route::post('login', 'CheckoutController@login');
+//Route::post('customer-register', 'CustomerApiController@customerRegister');
+Route::post('register', 'CheckoutController@register');
+
+// Route::post('login', 'ApiController@login');
+// //Route::post('customer-register', 'CustomerApiController@customerRegister');
+// Route::post('register', 'ApiController@register');
+Route::post('/customer_registration', 'CheckoutController@customer_registration');
 
 Route::group(['middleware' => 'auth.jwt'], function () {
-    Route::get('logout', 'ApiController@logout');
+    // Route::get('logout', 'ApiController@logout');
+    Route::get('logout', 'CheckoutController@logout');
 
-    // Route::get('products', 'ProductController@index');
-    // Route::get('/products/{product_id}', 'ProductController@show');
+    //Route::get('user', 'ApiController@getAuthUser');
+    Route::get('user', 'CheckoutController@getAuthUser');
 
-    Route::get('user', 'ApiController@getAuthUser');
+    /////////////////////////  PRODUCT ROUTE  ////////////////////////////
+    Route::get('products', 'ProductController@index');
 
-    //Route::get('/all-product', 'ProductController@all_product');
-    // Route::get('products', 'ProductController@index');
-    // Route::post('/save-product', 'ProductController@save_product');
-    // Route::get('products/{id}', 'ProductController@show');
-    // Route::post('products', 'ProductController@store');
-    // Route::put('products/{id}', 'ProductController@update');
-    // Route::delete('products/{id}', 'ProductController@destroy');
+    //////////////////  SHIPPING ROUTE  //////////////////
+    Route::post('/save-shipping-details', 'CheckoutController@save_shipping_details');
+
+    ////////////////// ORDER ROUTE ///////////////////
+    Route::post('/order-place', 'CheckoutController@order_place');
+    Route::get('/manage-order', 'CheckoutController@manage_order');
+    Route::get('/view-order/{order_id}', 'CheckoutController@view_order');
+
+    /////////////////////////////////  REVIEW ROUTE  ////////////////////////////////////
+    Route::post('/reviews', 'ReviewsController@store');
+
 });
 
 Route::get('users/profile', ['uses' => 'UsersController@profile', 'as' => 'users.profile']);
@@ -56,8 +69,9 @@ Route::get('/appointment', 'AppointmentController@index');
 Route::get('/create/appointment', 'AppointmentController@create');
 Route::post('/save/appointment', 'AppointmentController@store');
 
-//Route::get('/', 'HomesController@index');
+Route::get('/', 'HomesController@index');
 
+////////////////////////  SHOWING PRODUCT ROUTE  /////////////////////////
 Route::get('/product_by_category/{category_id}', 'HomesController@show_product_by_category');
 Route::get('/product_by_manufacture/{manufacture_id}', 'HomesController@show_product_by_manufacture');
 Route::get('/view_product/{product_id}', 'HomesController@product_details_by_id');
@@ -66,46 +80,51 @@ Route::get('/view_product/{product_id}', 'HomesController@product_details_by_id'
 ////////////////////   CART ROUTE   ////////////////////////
 Route::post('/add-to-cart', 'CartController@add_to_cart');
 Route::get('/show-cart', 'CartController@show_cart');
-Route::get('/delete-to-cart/{rowId}', 'CartController@delete_to_cart');
+Route::delete('/delete-to-cart/{rowId}', 'CartController@delete_to_cart');
 Route::post('/update-cart', 'CartController@update_cart');
 
+///////////////////  WISHLIST ROUTE  //////////////////
+Route::post('/addToWishList', 'HomeController@wishList');
+Route::get('/wishList', 'HomeController@view_wishList');
+Route::get('/removeWishList/{id}', 'HomeController@removeWishList');
+
+//////////////////////////////    PAYMENT ROUTE   ///////////////////////////////
+/////////////////// OMINI PACKAGE IS OK ////////////////////////
+//Route::get('payment', [OminiPaymentController::class, 'index']);
+Route::post('/store/payment', [OminiPaymentController::class, 'store']);
+Route::get('/success/payment', [OminiPaymentController::class, 'success']);
+Route::put('/payment/details/{id}', [OminiPaymentController::class, 'payment_details']);
 
 
+///////////////////   REVIEWS ROUTE  ///////////////////
+Route::get('/product-show-review/{product_id}', 'HomeController@productReview');
+Route::get('/show-reviews/{id}', 'ProductController@showReview');
 
+
+//////////////////////  CATEGORY ROUTE  ////////////////////////
 Route::get('/category', 'CategoryController@index');
 Route::get('/category-id/{category_id}', 'CategoryController@category_by_id');
-Route::post('/save-category', 'CategoryController@save_category');
-//Route::get('/edit-category/{category_id}', 'CategoryController@edit_category');
-Route::post('/update-category/{category_id}', 'CategoryController@update_category');
-Route::get('/delete-category/{category_id}', 'CategoryController@delete_category');
-Route::get('/unactive_category/{category_id}', 'CategoryController@unactive_category');
-Route::get('/active_category/{category_id}', 'CategoryController@active_category');
 
 
+//////////////////////  MANUFACTURE ROUTE  ////////////////////////
 Route::get('/manufacture', 'ManufactureController@index');
 Route::get('/manufacture-id/{manufacture_id}', 'ManufactureController@manufacture_by_id');
-Route::post('/save-manufacture', 'ManufactureController@save_manufacture');
-//Route::get('/edit-manufacture/{id}', 'ManufactureController@edit_manufacture');
-Route::post('/update-manufacture/{id}', 'ManufactureController@update_manufacture');
-Route::get('/delete-manufacture/{id}', 'ManufactureController@delete_manufacture');
-Route::get('/unactive_manufacture/{id}', 'ManufactureController@unactive_manufacture');
-Route::get('/active_manufacture/{id}', 'ManufactureController@active_manufacture');
 
 
-Route::get('products', 'ProductController@index');
-Route::get('/products/{product_id}', 'ProductController@show');
-Route::post('/save-product', 'ProductController@save_product');
-Route::post('/update-product/{product_id}', 'ProductController@update_product');
-Route::get('/add-product', 'ProductController@index');
-Route::get('/delete-product/{product_id}', 'ProductController@delete_product');
-Route::get('/unactive_product/{product_id}', 'ProductController@unactive_product');
-Route::get('/active_product/{product_id}', 'ProductController@active_product');
+// /////////////////////////  PRODUCT ROUTE  ////////////////////////////
+// Route::get('products', 'ProductController@index');
+Route::get('/products/{product_id}', 'ProductController@show_product_by_id');
 
-Route::get('/search-product/{product_name}', 'ProductController@search');
+////////////////////////  SEARCH ROUTE  ///////////////////////////
+Route::get('/search-product', 'ProductController@search');
+// Route::get('/search-product/{product_name}', 'ProductController@search');
 
 Route::get('/search-category/{category_name}', 'CategoryController@search');
 
 Route::get('/search-manufacture/{manufacture_name}', 'ManufactureController@search');
 
-Route::apiResource('products/{product}/reviews', 'ReviewController')->only('store', 'update', 'destroy');
+/////////////////////////////////  REVIEW ROUTE  ////////////////////////////////////
+Route::get('/review', 'ReviewsController@index');
+
+//Route::apiResource('products/{product}/reviews', 'ReviewController')->only('store', 'update', 'destroy');
 

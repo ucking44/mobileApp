@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Product;
 use app\Review;
+use App\WishList;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -43,6 +44,11 @@ class User extends Authenticatable implements JWTSubject
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(WishList::class);
     }
 
     /**

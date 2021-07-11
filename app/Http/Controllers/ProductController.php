@@ -69,6 +69,11 @@ class ProductController extends Controller
                    ->paginate(4);
                    //->toArray();
                    //->get();
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => $all_published_product,
+        //     'message' => 'All Successfully Published Products !!!',
+        // ], 200);
     }
 
     public function product_create()
@@ -88,11 +93,14 @@ class ProductController extends Controller
 
     public function showReview($id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
         $review = Review::all()->where('product_id', $id);
-        return view('pages.showReview.show', compact('product', 'review'));
+        //return view('pages.showReview.show', compact('product', 'review'));
+        return response()->json([
+            'success' => true,
+            'data' => $product, $review,
+        ], 200);
     }
-
 
     public function show_product_by_id($product_id)
     {
@@ -211,14 +219,19 @@ class ProductController extends Controller
 
     public function search(Request $request)
     {
-        $data = Product::
-                        where('product_name', 'like', '%' . $request->input('query') . '%')
+        $data = Product::where('product_name', 'like', '%' . $request->input('query') . '%')
                         ->join('categories', 'products.category_id', '=', 'categories.category_id')
                         ->join('manufactures', 'products.manufacture_id', '=', 'manufactures.manufacture_id')
                         ->simplePaginate(2);
                         // ->select('products.*', 'categories.category_name', 'manufactures.manufacture_name')
                         //->get();
-        return view('pages.search', ['products' => $data]);
+        //return view('pages.search', ['products' => $data]);
+        //return $data;
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ], 200);
 
     }
 }

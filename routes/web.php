@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\OminiPaymentController;
 
 Route::get('/', function () {
     return view('/welcome');
@@ -118,8 +119,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::get('/aboutus/active/{id}', 'AboutUsController@active_aboutUs');
 
     ///////////////////////  APPOINTMENT ROUTE  //////////////////////////////
-Route::get('/appointment', 'AppointmentController@index');
-//Route::post('/save/appointment', 'AppointmentController@store');
+    Route::get('/appointment', 'AppointmentController@index');
 
     ///////////////////////  CONTACT US ROUTE  ////////////////////////////
     Route::get('/contact-us', 'ContactUsController@contacts');
@@ -163,6 +163,13 @@ Route::post('/order-place', 'CheckoutController@order_place');
 Route::get('/manage-order', 'CheckoutController@manage_order');
 Route::get('/view-order/{order_id}', 'CheckoutController@view_order');
 
+//////////////////////////////    PAYMENT ROUTE   ///////////////////////////////
+/////////////////// OMINI PACKAGE IS OK ////////////////////////
+Route::get('payment', [OminiPaymentController::class, 'index']);
+Route::post('/store/payment', [OminiPaymentController::class, 'store']);
+Route::get('/success/payment', [OminiPaymentController::class, 'success']);
+Route::put('/payment/details/{id}', [OminiPaymentController::class, 'payment_details']);
+
 
 
 
@@ -180,12 +187,8 @@ Route::get('/search', 'ProductController@search');
 
 
 ///////////////////   REVIEWS ROUTE  ///////////////////
-// Route::post('/products', 'ReviewController@store');
-// Route::get('/get-reviews', 'ReviewController@getReview');
-//Route::get('/write-review/{product_id}', 'ReviewController@createReview');
 Route::get('/product-show-review/{product_id}', 'HomeController@productReview');
 Route::get('/show-reviews/{id}', 'ProductController@showReview');
-// Route::resource('reviews', 'ReviewsController');
 Route::post('/reviews', 'ReviewsController@store');
 
 

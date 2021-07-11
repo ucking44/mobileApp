@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Customer;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class WishList extends Model
@@ -12,7 +13,7 @@ class WishList extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'customer_id',
+        'user_id',
         'product_id',
     ];
 
@@ -20,4 +21,10 @@ class WishList extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

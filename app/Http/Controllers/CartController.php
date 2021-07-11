@@ -25,7 +25,12 @@ class CartController extends Controller
         $data['options']['image'] = $product_info->product_image;
 
         Cart::add($data);
-        return back();
+        //return back();
+        return response()->json([
+            'success' => true,
+            //'data' => $all_published_category,
+            'message' => 'Item Successfully Added To Cart !!!',
+        ], 200);
         //return Redirect::to('/show-cart');
     }
 
@@ -35,13 +40,23 @@ class CartController extends Controller
                                   ->where('status', 'enable')
                                   ->get();
 
-        return view('pages.add_to_cart', compact('all_published_category'));
+        //return view('pages.add_to_cart', compact('all_published_category'));
+        return response()->json([
+            'success' => true,
+            'data' => $all_published_category
+        ], 200);
+
     }
 
     public function delete_to_cart($rowId)
     {
         Cart::update($rowId, 0);
-        return Redirect::to('/show-cart');
+        //return Redirect::to('/show-cart');
+        return response()->json([
+            'success' => true,
+            //'data' => $all_published_category,
+            'message' => 'Item Successfully Deleted !!!',
+        ], 200);
         //Cart::destroy();
     }
 
@@ -51,7 +66,12 @@ class CartController extends Controller
         $rowId = $request->rowId;
         //dd($rowId);
          Cart::update($rowId, $qty);
-        return Redirect::to('/show-cart');
+        //return Redirect::to('/show-cart');
+        return response()->json([
+            'success' => true,
+            //'data' => $all_published_category,
+            'message' => 'Item Successfully Updated !!!',
+        ], 200);
         //Cart::destroy();
     }
 
